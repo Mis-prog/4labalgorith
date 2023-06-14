@@ -46,4 +46,24 @@ void graph::testinputcreateGraph(vector<vector<Edge>> &a) {
     }
 }
 
+vector<int>& graph::dijkstra(int s) {
+    vector<int> d(countNode, -1);
+    d[s] = 0;
+    priority_queue<pair<int,int>,vector<pair<int,int>>, greater<pair<int,int>>> q;
+    q.push({0, s});
+    while (!q.empty()) {
+        auto [cur_d, v] = q.top();
+        q.pop();
+        if (cur_d > d[v])
+            continue;
+        for (auto element : listgraph[v]) {
+            if (d[element.dist] > d[v] + element.from) {
+                d[element.dist] = d[v] + element.from;
+                q.push({d[element.dist], element.dist});
+            }
+        }
+    }
+    return d;
+}
+
 Edge::Edge(int to, int from, int dist) : to(to), from(from), dist(dist) {}

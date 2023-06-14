@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <queue>
 
 using namespace std;
 
@@ -21,5 +22,6 @@ public:
     void createGraph();
     void inputcreateGraph();
     void testinputcreateGraph(vector<vector<Edge>>& a);
+    vector<int>& dijkstra(int s);
     virtual ~graph();
 };
