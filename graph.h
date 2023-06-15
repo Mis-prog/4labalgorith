@@ -17,6 +17,7 @@ class graph {
     bool directed;
     ofstream out;
     vector<vector<Edge>> listgraph;
+    vector<vector<Edge>> printgraphnotdirected;
     vector<int> path;
     set<int> Node;
 public:
@@ -25,9 +26,9 @@ public:
     void addEdge(int from,int to,int dist);
     void createGraph();
     void inputcreateGraph();
-    void testinputcreateGraph(vector<vector<Edge>>& a);
+    void testinputcreateGraph(vector<vector<Edge>>& a,vector<vector<Edge>>& print);
     vector<int>& dijkstra(int s);
     void print_path(int v,int s);
-    void outDataSet();
+    void outDataSet(vector<vector<Edge>>& print);
     virtual ~graph();
 };

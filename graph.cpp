@@ -15,10 +15,12 @@ void graph::addEdge(int from, int to, int dist) {
     if (directed) {
         Edge n = Edge(from, to, dist);
         listgraph[from].push_back(n);
+        printgraphnotdirected[from].push_back(n);
         Node.insert(from);Node.insert(to);
     }else{
         Edge forward = Edge(from, to, dist);
         Edge back=Edge(to,from,dist);
+        printgraphnotdirected[from].push_back(forward);
         listgraph[from].push_back(forward);
         listgraph[to].push_back(back);
         Node.insert(from);Node.insert(to);
@@ -29,11 +31,12 @@ void graph::createGraph() {
     setOutName("commands.js");
     out << "window.prog=`" << endl;
     listgraph.resize(countNode);
+    printgraphnotdirected.resize(countNode);
     srand(time(0));
     for (int i=0;i<countEdge;i++){
         addEdge(rand()%countNode,rand()%countNode,1+rand()%10);
     }
-    outDataSet();
+    outDataSet(printgraphnotdirected);
     if (directed){
         out << "drawdir" << endl;
     } else{
@@ -45,14 +48,14 @@ void graph::createGraph() {
 void graph::inputcreateGraph() {
     setOutName("commands.js");
     out << "window.prog=`" << endl;
-    vector<Edge> a;
-    listgraph.resize(countNode,a);
+    listgraph.resize(countNode);
+    printgraphnotdirected.resize(countNode);
     int from,to,dist;
     for (int i=0;i<countEdge;i++) {
         cin >> from >> to >> dist;
         addEdge(from,to,dist);
     }
-    outDataSet();
+    outDataSet(printgraphnotdirected);
     if (directed){
         out << "drawdir" << endl;
     } else{
@@ -61,7 +64,7 @@ void graph::inputcreateGraph() {
     out << "`";
 }
 
-void graph::testinputcreateGraph(vector<vector<Edge>> &a) {
+void graph::testinputcreateGraph(vector<vector<Edge>> &a,vector<vector<Edge>>& print) {
     setOutName("commands.js");
     out << "window.prog=`" << endl;
     listgraph.resize(countNode);
@@ -71,7 +74,7 @@ void graph::testinputcreateGraph(vector<vector<Edge>> &a) {
             Node.insert(element.from);Node.insert(element.to);
         }
     }
-    outDataSet();
+    outDataSet(print);
     if (directed){
         out << "drawdir" << endl;
     } else{
@@ -110,13 +113,13 @@ void graph::print_path(int s,int v) {
     cout << s << endl;
 }
 
-void graph::outDataSet() {
+void graph::outDataSet(vector<vector<Edge>>& print) {
     for(auto i:Node){
         out << i << endl;
     }
-    for(int i=0;i<countNode;i++){
-        for(auto element:listgraph[i]){
-            out << i << "-" << element.to << ",label=" << element.dist << endl;
+    for (int i = 0; i < countNode; i++) {
+        for (auto element: print[i]) {
+                out << i << "-" << element.to << ",label=" << element.dist << endl;
         }
     }
 }
