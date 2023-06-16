@@ -13,22 +13,27 @@ graph::~graph() {
 
 void graph::addEdge(int from, int to, int dist) {
     if (directed) {
-        Edge n = Edge(from, to, dist);
-        listgraph[from].push_back(n);
-        printgraphnotdirected[from].push_back(n);
-        Node.insert(from);Node.insert(to);
+        if (!check(listgraph[from],to)){
+            Edge n = Edge(from, to, dist);
+            listgraph[from].push_back(n);
+            printgraphnotdirected[from].push_back(n);
+            Node.insert(from);Node.insert(to);
+        }
     }else{
-        Edge forward = Edge(from, to, dist);
-        Edge back=Edge(to,from,dist);
-        printgraphnotdirected[from].push_back(forward);
-        listgraph[from].push_back(forward);
-        listgraph[to].push_back(back);
-        Node.insert(from);Node.insert(to);
+        if (!check(listgraph[from],to)) {
+            Edge forward = Edge(from, to, dist);
+            Edge back = Edge(to, from, dist);
+            printgraphnotdirected[from].push_back(forward);
+            listgraph[from].push_back(forward);
+            listgraph[to].push_back(back);
+            Node.insert(from);
+            Node.insert(to);
+        }
     }
 }
 
-void graph::createGraph() {
-    setOutName("commands.js");
+void graph::createGraph(char *fname) {
+    setOutName(fname);
     out << "window.prog=`" << endl;
     listgraph.resize(countNode);
     printgraphnotdirected.resize(countNode);
@@ -42,11 +47,10 @@ void graph::createGraph() {
     } else{
         out << "draw" << endl;
     }
-    out << "`";
 }
 
-void graph::inputcreateGraph() {
-    setOutName("commands.js");
+void graph::inputcreateGraph(char *fname) {
+    setOutName(fname);
     out << "window.prog=`" << endl;
     listgraph.resize(countNode);
     printgraphnotdirected.resize(countNode);
@@ -61,11 +65,10 @@ void graph::inputcreateGraph() {
     } else{
         out << "draw" << endl;
     }
-    out << "`";
 }
 
-void graph::testinputcreateGraph(vector<vector<Edge>> &a,vector<vector<Edge>>& print) {
-    setOutName("commands.js");
+void graph::testinputcreateGraph(char *fname,vector<vector<Edge>> &a,vector<vector<Edge>>& print) {
+    setOutName(fname);
     out << "window.prog=`" << endl;
     listgraph.resize(countNode);
     for (int i=0;i<countNode;i++){
@@ -80,38 +83,8 @@ void graph::testinputcreateGraph(vector<vector<Edge>> &a,vector<vector<Edge>>& p
     } else{
         out << "draw" << endl;
     }
-    out << "`";
 }
 
-vector<int>& graph::dijkstra(int s) {
-    vector<int> d(countNode, -1);
-    path.resize(countNode);
-    d[s] = 0;
-    priority_queue<pair<int,int>,vector<pair<int,int>>, greater<pair<int,int>>> q;
-    q.push({0, s});
-    while (!q.empty()) {
-        auto [cur_d, v] = q.top();
-        q.pop();
-        if (cur_d > d[v])
-            continue;
-        for (auto element : listgraph[v]) {
-            if (d[element.dist] > d[v] + element.from) {
-                d[element.dist] = d[v] + element.from;
-                path[element.dist]=v;
-                q.push({d[element.dist], element.dist});
-            }
-        }
-    }
-    return d;
-}
-
-void graph::print_path(int s,int v) {
-    while (v!=s){
-        cout << v <<endl;
-        v=path[v];
-    }
-    cout << s << endl;
-}
 
 void graph::outDataSet(vector<vector<Edge>>& print) {
     for(auto i:Node){
@@ -119,9 +92,94 @@ void graph::outDataSet(vector<vector<Edge>>& print) {
     }
     for (int i = 0; i < countNode; i++) {
         for (auto element: print[i]) {
-                out << i << "-" << element.to << ",label=" << element.dist << endl;
+                out << element.from << "-" << element.to << ",label=" << element.dist << endl;
         }
     }
+}
+
+vector<int> graph::dijkstraSet(int start) {
+    out << "p,Find the shortest paths from the vertex " << start << endl;
+    vector<int> dist(countNode,INF);
+    dist[start]=0;
+    //out << start << ",color=lime,width=5\n";
+    //out << start << ",shape=box,color=red,label=" << start << "/dist:" << dist[start] << endl;
+    set<pair<int,int>> q;
+    q.insert({dist[start],start});
+    while (!q.empty()){
+        int nearest=q.begin()->second;
+        out << nearest << ",shape=box,color=blue,label=" << nearest << "/dist:" << dist[nearest] << endl;
+        out << "p, go to vertex" << nearest << " with minimal distance| ";
+        for (auto i:q) {
+            out << i.second << " distance:" << i.first << " | ";
+        }
+        out << endl;
+        q.erase(q.begin());
+        for (auto &element:listgraph[nearest]){
+            if(dist[element.to]>dist[nearest]+element.dist) {
+                if (directed) {
+                    out << "w,500" << endl;
+                    out << nearest << "-" << element.to << ",color=lime,width=5\n";
+                    out << "w,500" << endl;
+                    q.erase({dist[element.to], element.to});
+                    dist[element.to] = dist[nearest] + element.dist;
+                    out << element.to << ",shape=box,color=red,label=" << element.to << "/dist:" << dist[element.to]
+                        << endl;
+                    q.insert({dist[element.to], element.to});
+                }else{
+                    if (check(printgraphnotdirected[nearest],element.to)){
+                          out << "w,500" << endl;
+                        out << nearest << "-" << element.to << ",color=lime,width=5\n";
+                        out << "w,500" << endl;
+                        q.erase({dist[element.to], element.to});
+                        dist[element.to] = dist[nearest] + element.dist;
+                        out << element.to << ",shape=box,color=red,label=" << element.to << "/dist:" << dist[element.to]
+                            << endl;
+                        q.insert({dist[element.to], element.to});
+                    }else{
+                        out << "w,500" << endl;
+                        out << element.to << "-" << nearest << ",color=lime,width=5\n";
+                        out << "w,500" << endl;
+                        q.erase({dist[element.to], element.to});
+                        dist[element.to] = dist[nearest] + element.dist;
+                        out << element.to<< ",shape=box,color=red,label=" << element.to << "/dist:" << dist[element.to]
+                            << endl;
+                        q.insert({dist[element.to], element.to});
+                    }
+                }
+
+                out << "p,better distance to " << element.to << " = "<<dist[element.to]<<endl;
+//                for (auto i:q){
+//                    if (i.second==element.to){
+//                        out << i.first << " ";
+//                    }
+//                }
+//                out << endl;
+                }
+            }
+        out<<"pause\n";
+        }
+    out << "p,best distance: |";
+    for (int i=0;i<countNode;i++){
+         out << i << " = "<<dist[i] << "|";
+    }
+    out << endl;
+    out << "pause" << endl;
+    out << "`";
+    return dist;
+}
+
+
+bool graph::check(vector<Edge>& c,int n) {
+    for (auto i:c){
+        if (i.to==n){
+            return true;
+        }
+    }
+    return false;
+}
+
+int graph::getCountNode() const {
+    return countNode;
 }
 
 Edge::Edge(int from, int to, int dist) : to(to), from(from), dist(dist) {}

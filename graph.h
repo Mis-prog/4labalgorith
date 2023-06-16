@@ -4,8 +4,10 @@
 #include <random>
 #include <queue>
 #include <set>
-
+#include <windows.h>
 using namespace std;
+
+const int INF=1e9;
 
 struct Edge{
     int from,to,dist;
@@ -21,14 +23,16 @@ class graph {
     vector<int> path;
     set<int> Node;
 public:
+    int getCountNode() const;
+
     graph(int countNode, int countEdge, bool directed=0);
     void setOutName(char* name);
     void addEdge(int from,int to,int dist);
-    void createGraph();
-    void inputcreateGraph();
-    void testinputcreateGraph(vector<vector<Edge>>& a,vector<vector<Edge>>& print);
-    vector<int>& dijkstra(int s);
-    void print_path(int v,int s);
+    void createGraph(char *fname);
+    vector<int> dijkstraSet(int start);
+    void inputcreateGraph(char *fname);
+    void testinputcreateGraph(char *fname,vector<vector<Edge>>& a,vector<vector<Edge>>& print);
     void outDataSet(vector<vector<Edge>>& print);
+    bool check(vector<Edge>& c,int n);
     virtual ~graph();
 };
